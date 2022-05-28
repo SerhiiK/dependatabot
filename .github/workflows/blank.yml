@@ -1,5 +1,7 @@
 name: 🚀 Check Vulnerability
-on: push
+on:
+  pull_request:
+  push:
 jobs:
   deploy:
     runs-on: ubuntu-latest
