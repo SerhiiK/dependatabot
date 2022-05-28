@@ -16,7 +16,7 @@ jobs:
       - name: Error Exit
         if: steps.alerts.outputs.total_alerts > 0
         continue-on-error: true
-        run: echo "::error ::Open Vulnerability Alerts Found"
+        run: echo ${{ steps.alerts.outputs.total_alerts }}   #"::error ::Open Vulnerability Alerts Found"
         
       - name: Comment PR
         if: steps.alerts.outputs.total_alerts > 0
