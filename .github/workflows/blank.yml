@@ -23,8 +23,7 @@ jobs:
         uses: thollander/actions-comment-pull-request@v1
         continue-on-error: true
         with:
-          message: |
-            Hello world ! :wave:
+          message: steps.alerts.outputs.total_alerts
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Deploy
