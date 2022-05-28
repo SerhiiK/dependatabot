@@ -15,7 +15,7 @@ jobs:
 
       - name: Error Exit
         if: steps.alerts.outputs.total_alerts > 0
-        run: echo "::error ::Open Vulnerability Alerts Found" && exit 1
+        run: echo "::error ::Open Vulnerability Alerts Found"
         
       - name: Comment PR
         if: steps.alerts.outputs.total_alerts > 0
