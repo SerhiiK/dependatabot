@@ -16,7 +16,14 @@ jobs:
       - name: Error Exit
         if: steps.alerts.outputs.total_alerts > 0
         run: echo "::error ::Open Vulnerability Alerts Found" && exit 1
+        
+      - name: Comment PR
+        uses: thollander/actions-comment-pull-request@v1
+        with:
+          message: |
+            Hello world ! :wave:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Deploy
         run: |
-          printf "No open vulnerabilities found. Running deployment now..."
+          printf "No open vulnerabilities found. Running deployment now..." 
