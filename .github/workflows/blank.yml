@@ -1,9 +1,9 @@
-name: 🚀 Deploy to Prod
-on: workflow_dispatch
+name: 🚀 
+on: push
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deployment
+    name: Check vulnerability
     steps:
       - name: Check Dependabot Alerts
         id: alerts
