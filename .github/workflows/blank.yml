@@ -18,6 +18,9 @@ jobs:
         continue-on-error: true
         run: echo "::error ::Open Vulnerability Alerts Found"
         
+      - name: Env vars
+        run: env
+        
       - name: Comment PR
         if: steps.alerts.outputs.critical_alerts > 0
         uses: thollander/actions-comment-pull-request@v1
