@@ -14,16 +14,16 @@ jobs:
           github_personal_token: ${{ secrets.GH_PAT }}  
 
       - name: Error Exit
-        if: steps.alerts.outputs.total_alerts > 0
+        if: steps.alerts.outputs.critical_alerts > 0
         continue-on-error: true
-        run: echo ${{ steps.alerts.outputs.total_alerts }}   #"::error ::Open Vulnerability Alerts Found"
+        run: echo "::error ::Open Vulnerability Alerts Found"
         
       - name: Comment PR
-        if: steps.alerts.outputs.total_alerts > 0
+        if: steps.alerts.outputs.critical_alerts > 0
         uses: thollander/actions-comment-pull-request@v1
         continue-on-error: true
         with:
-          message: steps.alerts.outputs.total_alerts
+          message: echo "Code has critical vulnerability"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Deploy
