@@ -12,6 +12,8 @@ jobs:
         uses: spicyparrot/check-dependabot@v1.2.0
         with:
           github_personal_token: ${{ secrets.GH_PAT }}  
+      
+      - run: jq --version 
 
       - name: Error Exit
         if: steps.alerts.outputs.critical_alerts > 0
