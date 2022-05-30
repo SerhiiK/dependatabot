@@ -1,9 +1,11 @@
-name: 🚀 Deploy to Prod
-on: workflow_dispatch
+name: 🚀 Check Vulnerability
+on:
+  pull_request:
+  push:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deployment
+    name: Check vulnerability
     steps:
       - name: Check Dependabot Alerts
         id: alerts
@@ -12,9 +14,20 @@ jobs:
           github_personal_token: ${{ secrets.GH_PAT }}  
 
       - name: Error Exit
-        if: steps.alerts.outputs.total_alerts > 0
-        run: echo "::error ::Open Vulnerability Alerts Found" && exit 1
+        if: steps.alerts.outputs.critical_alerts > 0
+        continue-on-error: true
+        run: echo "::error ::Open Vulnerability Alerts Found"
+        
+      - name: Env vars
+        run: env
+        
+      - name: Comment PR
+        if: steps.alerts.outputs.critical_alerts > 0
+        uses: thollander/actions-comment-pull-request@v1
+        with:
+          message: env
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Deploy
         run: |
-          printf "No open vulnerabilities found. Running deployment now..."
+          printf "No open vulnerabilities found. Running deployment now..." 
