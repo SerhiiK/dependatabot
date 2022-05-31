@@ -3,7 +3,6 @@ name: 🚀 Check Vulnerability
 on:
   workflow_call:
   pull_request:
-  push:
   
 jobs:
   deploy:
@@ -51,13 +50,22 @@ jobs:
                   --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability | \
                   jq 'select(.advisory.severity == "CRITICAL")' > result.json
           
-        
+      - name: Result
+        id: alerts-list
+        run: echo ::set-output name=alerts_list::$(cat result.json | jq .advisory.permalink -r )
+          
       - name: Comment PR
         if: steps.alerts.outputs.critical_alerts > 0
         uses: thollander/actions-comment-pull-request@v1
         with:
-          message: echo $OWNER
+          message: |
+               This PR has secutiry alerts. Pls fix it before merge:
+               ${{ steps.alerts-list.outputs.alerts_list }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Check
+        if: steps.alerts.outputs.critical_alerts > 0
+        run: exit 1
       
       - name: Deploy
         run: |
