@@ -38,7 +38,7 @@ jobs:
                 }
               }    
             }
-          }
+          }'
           
           curl -s -H "Authorization: bearer ${{ secrets.GITHUB_TOKEN }}" \
                   -H 'Content-Type: application/json' \
