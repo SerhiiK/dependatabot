@@ -1,7 +1,10 @@
 name: 🚀 Check Vulnerability
+
 on:
+  workflow_call:
   pull_request:
   push:
+  
 jobs:
   deploy:
     runs-on: ubuntu-latest
