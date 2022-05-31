@@ -3,7 +3,8 @@ name: 🚀 Check Vulnerability
 on:
   workflow_call:
   pull_request:
-  
+    branches-ignore: 
+     - 'dependabot/*'
 jobs:
   deploy:
     runs-on: ubuntu-latest
