@@ -1,7 +1,6 @@
 name: 🚀 Check Vulnerability
 
 on:
-  workflow_call:
   pull_request:
       branches: 
       - '!dependabot/**'
