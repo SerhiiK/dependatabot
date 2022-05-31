@@ -17,11 +17,33 @@ jobs:
         if: steps.alerts.outputs.critical_alerts > 0
         continue-on-error: true
         run: |
-          OWNER=$(echo $GITHUB_REPOSITORY | cut -f1 -d "/")
-          REPO=$(echo $GITHUB_REPOSITORY | cut -f2 -d "/")
+          export OWNER=$(echo $GITHUB_REPOSITORY | cut -f1 -d "/")
+          export REPO=$(echo $GITHUB_REPOSITORY | cut -f2 -d "/")
           echo $OWNER
           echo $REPO
           
+          script='query {
+            repository(owner: \"OWNER\", name: \"REPO\") {
+              vulnerabilityAlerts(first: 10) {
+                nodes {
+                  securityVulnerability {
+                    package {
+                      name
+                    }
+                    advisory {
+                      severity
+                      permalink
+                    }  
+                  }
+                }
+              }    
+            }
+          }
+          
+          curl -s -H "Authorization: bearer ${{ secrets.GITHUB_TOKEN }}" \
+                  -H 'Content-Type: application/json' \
+                  -X POST https://api.github.com/graphql \
+                  --data "{ \"query\": \"$script\"}"
         
       - name: Comment PR
         if: steps.alerts.outputs.critical_alerts > 0
