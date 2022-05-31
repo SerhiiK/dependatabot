@@ -50,13 +50,14 @@ jobs:
                   -X POST https://api.github.com/graphql \
                   --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability | \
                   jq 'select(.advisory.severity == "CRITICAL")' > result.json
-          
         
+          echo ::set-output name=alets_list::$(cat result.json | jq .[][])
+      
       - name: Comment PR
         if: steps.alerts.outputs.critical_alerts > 0
         uses: thollander/actions-comment-pull-request@v1
         with:
-          message: echo $OWNER
+          message: ${{ steps.alerts.outputs.alerts_list }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Deploy
