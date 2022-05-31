@@ -49,7 +49,7 @@ jobs:
           curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
                   -H 'Content-Type: application/json' \
                   -X POST https://api.github.com/graphql \
-                  --data "{ \"query\": \"$script\"}" | | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability | \
+                  --data "{ \"query\": \"$script\"}" | | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability |
                   jq 'select(.advisory.severity == "CRITICAL")'
         
       - name: Comment PR
