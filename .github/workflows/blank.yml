@@ -18,7 +18,7 @@ jobs:
         continue-on-error: true
         run: |
           OWNER=$(echo $GITHUB_REPOSITORY | cut -f1 -d "/")
-          REPO=$(echo $GITHUB_REPOSITORY | cut -f1 -d "/")
+          REPO=$(echo $GITHUB_REPOSITORY | cut -f2 -d "/")
           echo $OWNER
           echo $REPO
           
