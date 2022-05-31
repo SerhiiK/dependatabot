@@ -3,8 +3,7 @@ name: 🚀 Check Vulnerability
 on:
   push:
   pull_request:
-      branches: 
-      - '!dependabot/**'
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
