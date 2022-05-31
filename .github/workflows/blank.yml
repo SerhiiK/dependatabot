@@ -12,16 +12,16 @@ jobs:
         uses: spicyparrot/check-dependabot@v1.2.0
         with:
           github_personal_token: ${{ secrets.GH_PAT }}  
-      
-      - run: jq --version 
 
       - name: Error Exit
         if: steps.alerts.outputs.critical_alerts > 0
         continue-on-error: true
-        run: echo "::error ::Open Vulnerability Alerts Found"
-        
-      - name: Env vars
-        run: env
+        run: |
+          OWNER=$(echo $GITHUB_REPOSITORY | cut -f1 -d "/")
+          REPO=$(echo $GITHUB_REPOSITORY | cut -f1 -d "/")
+          echo $OWNER
+          echo $REPO
+          
         
       - name: Comment PR
         if: steps.alerts.outputs.critical_alerts > 0
