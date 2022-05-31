@@ -3,7 +3,6 @@ name: 🚀 Check Vulnerability
 on:
   workflow_call:
   pull_request:
-  push:
   
 jobs:
   deploy:
@@ -53,9 +52,7 @@ jobs:
           
       - name: Result
         id: alerts-list
-        run: |
-          cat result.json | jq .[][]
-          echo ::set-output name=alerts_list::$(cat result.json | jq .advisory.permalink -r )
+        run: echo ::set-output name=alerts_list::$(cat result.json | jq .advisory.permalink -r )
           
       - name: Comment PR
         if: steps.alerts.outputs.critical_alerts > 0
