@@ -19,8 +19,6 @@ jobs:
         run: |
           export OWNER=$(echo $GITHUB_REPOSITORY | cut -f1 -d "/")
           export REPO=$(echo $GITHUB_REPOSITORY | cut -f2 -d "/")
-          echo $OWNER
-          echo $REPO
           
           script='query {
             repository(owner: \"OWNER\", name: \"REPO\") {
@@ -43,14 +41,14 @@ jobs:
           script=$(echo $script | sed "s|OWNER|${OWNER}|g")
           script=$(echo $script | sed "s|REPO|${REPO}|g")
           
-          echo $script
-          
           
           curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
                   -H 'Content-Type: application/json' \
                   -X POST https://api.github.com/graphql \
                   --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability | \
-                  jq 'select(.advisory.severity == "CRITICAL")'
+                  jq 'select(.advisory.severity == "CRITICAL")' > result.json
+          
+          cat result.json | jq
         
       - name: Comment PR
         if: steps.alerts.outputs.critical_alerts > 0
