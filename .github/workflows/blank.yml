@@ -40,6 +40,12 @@ jobs:
             }
           }'
           
+          script=$(echo $script | sed "s|OWNER|${OWNER}|g")
+          script=$(echo $script | sed "s|REPO|${REPO}|g")
+          
+          echo $script
+          
+          
           curl -s -H "Authorization: bearer ${{ secrets.GITHUB_TOKEN }}" \
                   -H 'Content-Type: application/json' \
                   -X POST https://api.github.com/graphql \
