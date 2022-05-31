@@ -46,7 +46,7 @@ jobs:
           echo $script
           
           
-          curl -s -H "Authorization: bearer ${{ secrets.GITHUB_TOKEN }}" \
+          curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
                   -H 'Content-Type: application/json' \
                   -X POST https://api.github.com/graphql \
                   --data "{ \"query\": \"$script\"}"
