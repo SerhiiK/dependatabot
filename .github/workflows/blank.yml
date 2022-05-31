@@ -1,7 +1,10 @@
 name: 🚀 Check Vulnerability
+
 on:
+  workflow_call:
   pull_request:
   push:
+  
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -16,16 +19,44 @@ jobs:
       - name: Error Exit
         if: steps.alerts.outputs.critical_alerts > 0
         continue-on-error: true
-        run: echo "::error ::Open Vulnerability Alerts Found"
-        
-      - name: Env vars
-        run: env
+        run: |
+          export OWNER=$(echo $GITHUB_REPOSITORY | cut -f1 -d "/")
+          export REPO=$(echo $GITHUB_REPOSITORY | cut -f2 -d "/")
+          
+          script='query {
+            repository(owner: \"OWNER\", name: \"REPO\") {
+              vulnerabilityAlerts(first: 10) {
+                nodes {
+                  securityVulnerability {
+                    package {
+                      name
+                    }
+                    advisory {
+                      severity
+                      permalink
+                    }  
+                  }
+                }
+              }    
+            }
+          }'
+          
+          script=$(echo $script | sed "s|OWNER|${OWNER}|g")
+          script=$(echo $script | sed "s|REPO|${REPO}|g")
+          
+          
+          curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
+                  -H 'Content-Type: application/json' \
+                  -X POST https://api.github.com/graphql \
+                  --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability | \
+                  jq 'select(.advisory.severity == "CRITICAL")' > result.json
+          
         
       - name: Comment PR
         if: steps.alerts.outputs.critical_alerts > 0
         uses: thollander/actions-comment-pull-request@v1
         with:
-          message: env
+          message: echo $OWNER
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Deploy
