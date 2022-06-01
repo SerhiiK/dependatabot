@@ -75,6 +75,8 @@ jobs:
       - name: Result
         id: alerts-list
         run: echo ::set-output name=alerts_list::$(cat result.json | jq .advisory.permalink -r )
+        
+      - run: env
           
       - name: Comment PR
         if: steps.alerts.outputs.critical_alerts > 0
