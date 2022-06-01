@@ -12,19 +12,33 @@ jobs:
     steps:
       - name: Check Dependabot Alerts
         id: alerts
-        uses: spicyparrot/check-dependabot@v1.2.0
-        with:
-          github_personal_token: ${{ secrets.GH_PAT }}  
-
+        run: |          
+          script="query {
+            repository(owner: \"${GITHUB_REPOSITORY_OWNER}\", name: \"${GITHUB_REPOSITORY}\") {
+              vulnerabilityAlerts(first: 10) {
+                nodes {
+                  securityAdvisory { 
+                    severity
+                  }
+                  state
+                }
+              }    
+            }
+          }"
+          count=$(curl -s -H "Authorization: bearer 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" \
+                          -H 'Content-Type: application/json' \
+                          -X POST https://api.github.com/graphql \
+                          --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | \
+                          jq 'select((.securityAdvisory.severity == "CRITICAL") and .state == "OPEN" )' | \
+                          jq .securityAdvisory.severity | wc -l )
+                  
+          echo ::set-output name=critical_alerts::$count 
       - name: Error Exit
         if: steps.alerts.outputs.critical_alerts > 0
         continue-on-error: true
-        run: |
-          export OWNER=$(echo $GITHUB_REPOSITORY | cut -f1 -d "/")
-          export REPO=$(echo $GITHUB_REPOSITORY | cut -f2 -d "/")
-          
-          script='query {
-            repository(owner: \"OWNER\", name: \"REPO\") {
+        run: |          
+          script="query {
+            repository(owner: \"${GITHUB_REPOSITORY_OWNER}\", name: \"${GITHUB_REPOSITORY}\") {
               vulnerabilityAlerts(first: 10) {
                 nodes {
                   securityVulnerability {
@@ -39,21 +53,15 @@ jobs:
                 }
               }    
             }
-          }'
-          
-          script=$(echo $script | sed "s|OWNER|${OWNER}|g")
-          script=$(echo $script | sed "s|REPO|${REPO}|g")
-          
+          }"
           
           curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
                   -H 'Content-Type: application/json' \
                   -X POST https://api.github.com/graphql \
                   --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability | \
                   jq 'select(.advisory.severity == "CRITICAL")' > result.json
-          
-      - name: Result
-        id: alerts-list
-        run: echo ::set-output name=alerts_list::$(cat result.json | jq .advisory.permalink -r )
+        
+          echo ::set-output name=alerts_list::$(cat result.json | jq .advisory.permalink -r )
           
       - name: Comment PR
         if: steps.alerts.outputs.critical_alerts > 0
@@ -62,12 +70,8 @@ jobs:
           message: |
                This PR has secutiry alerts. Pls fix it before merge:
                ${{ steps.alerts-list.outputs.alerts_list }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
       
       - name: Check
         if: steps.alerts.outputs.critical_alerts > 0
         run: exit 1
-      
-      - name: Deploy
-        run: |
-          printf "No open vulnerabilities found. Running deployment now..." 
