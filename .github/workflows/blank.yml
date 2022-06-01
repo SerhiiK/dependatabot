@@ -13,8 +13,8 @@ jobs:
       - name: Check Dependabot Alerts
         id: alerts
         run: |          
-          script="query {
-            repository(owner: \"${GITHUB_REPOSITORY_OWNER}\", name: \"${GITHUB_REPOSITORY}\") {
+          script='query {
+            repository(owner: \"$OWNER\", name: \"REPOSITOR\") {
               vulnerabilityAlerts(first: 10) {
                 nodes {
                   securityAdvisory { 
@@ -24,8 +24,12 @@ jobs:
                 }
               }    
             }
-          }"
-          count=$(curl -s -H "Authorization: bearer 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" \
+          }'
+          
+          script=$(echo $script / sed "s/OWNER/${GITHUB_REPOSITORY_OWNER}/g")
+          script=$(echo $script / sed "s/REPO/${GITHUB_REPOSITORY}/g")
+          
+          count=$(curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
                           -H 'Content-Type: application/json' \
                           -X POST https://api.github.com/graphql \
                           --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | \
@@ -38,7 +42,7 @@ jobs:
         continue-on-error: true
         run: |          
           script="query {
-            repository(owner: \"${GITHUB_REPOSITORY_OWNER}\", name: \"${GITHUB_REPOSITORY}\") {
+            repository(owner: \"$OWNER\", name: \"REPOSITOR\") {
               vulnerabilityAlerts(first: 10) {
                 nodes {
                   securityVulnerability {
@@ -54,6 +58,9 @@ jobs:
               }    
             }
           }"
+          
+          script=$(echo $script / sed "s/OWNER/${GITHUB_REPOSITORY_OWNER}/g")
+          script=$(echo $script / sed "s/REPO/${GITHUB_REPOSITORY}/g")
           
           curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
                   -H 'Content-Type: application/json' \
