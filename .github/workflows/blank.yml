@@ -76,7 +76,3 @@ jobs:
       - name: Check
         if: steps.alerts.outputs.critical_alerts > 0
         run: exit 1
-      
-      - name: Deploy
-        run: |
-          printf "No open vulnerabilities found. Running deployment now..." 
