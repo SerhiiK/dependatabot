@@ -11,11 +11,9 @@ jobs:
       - name: Check Dependabot Alerts
         id: alerts
         run: |
-          export OWNER=$(echo $GITHUB_REPOSITORY | cut -f1 -d "/")
-          export REPO=$(echo $GITHUB_REPOSITORY | cut -f2 -d "/")
           
-          script='query {
-            repository(owner: \"OWNER\", name: \"REPO\") {
+          script="query {
+            repository(owner: \"${GITHUB_REPOSITORY_OWNER}\", name: \"${GITHUB_REPOSITORY}\") {
               vulnerabilityAlerts(first: 10) {
                 nodes {
                   securityAdvisory { 
@@ -24,10 +22,7 @@ jobs:
                 }
               }    
             }
-          }'
-          
-          script=$(echo $script | sed "s|OWNER|${OWNER}|g")
-          script=$(echo $script | sed "s|REPO|${REPO}|g")
+          }"
           
           count=$(curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
                   -H 'Content-Type: application/json' \
@@ -44,7 +39,7 @@ jobs:
           export OWNER=$(echo $GITHUB_REPOSITORY | cut -f1 -d "/")
           export REPO=$(echo $GITHUB_REPOSITORY | cut -f2 -d "/")
           
-          script='query {
+          script="query {
             repository(owner: \"OWNER\", name: \"REPO\") {
               vulnerabilityAlerts(first: 10) {
                 nodes {
@@ -60,23 +55,15 @@ jobs:
                 }
               }    
             }
-          }'
-          
-          script=$(echo $script | sed "s|OWNER|${OWNER}|g")
-          script=$(echo $script | sed "s|REPO|${REPO}|g")
-          
+          }"
           
           curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
                   -H 'Content-Type: application/json' \
                   -X POST https://api.github.com/graphql \
                   --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability | \
                   jq 'select(.advisory.severity == "CRITICAL")' > result.json
-          
-      - name: Result
-        id: alerts-list
-        run: echo ::set-output name=alerts_list::$(cat result.json | jq .advisory.permalink -r )
-        
-      - run: env
+                  
+          echo ::set-output name=alerts_list::$(cat result.json | jq .advisory.permalink -r )
           
       - name: Comment PR
         if: steps.alerts.outputs.critical_alerts > 0
