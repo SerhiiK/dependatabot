@@ -1,4 +1,4 @@
 pytorch-lightning==1.6.3
 admesh==0.98.9
 Django==4.0.3
-thefuck==3.30
+thefuck==3.31
