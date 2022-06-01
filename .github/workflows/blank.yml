@@ -10,9 +10,32 @@ jobs:
     steps:
       - name: Check Dependabot Alerts
         id: alerts
-        uses: spicyparrot/check-dependabot@v1.2.0
-        with:
-          github_personal_token: ${{ secrets.GH_PAT }}  
+        run: |
+          export OWNER=$(echo $GITHUB_REPOSITORY | cut -f1 -d "/")
+          export REPO=$(echo $GITHUB_REPOSITORY | cut -f2 -d "/")
+          
+          script='query {
+            repository(owner: \"OWNER\", name: \"REPO\") {
+              vulnerabilityAlerts(first: 10) {
+                nodes {
+                  securityAdvisory { 
+                    severity
+                  }
+                }
+              }    
+            }
+          }'
+          
+          script=$(echo $script | sed "s|OWNER|${OWNER}|g")
+          script=$(echo $script | sed "s|REPO|${REPO}|g")
+          
+          count=$(curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
+                  -H 'Content-Type: application/json' \
+                  -X POST https://api.github.com/graphql \
+                  --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | \
+                  jq 'select(.securityAdvisory.severity == "CRITICAL")' | jq .securityAdvisory.severity | wc -l)
+                  
+          echo ::set-output name=critical_alerts::$count 
 
       - name: Error Exit
         if: steps.alerts.outputs.critical_alerts > 0
