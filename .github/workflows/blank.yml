@@ -40,7 +40,8 @@ jobs:
                          --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | \
                          jq 'select((.securityAdvisory.severity == "CRITICAL") and .state == "OPEN" )' | \
                          jq .securityAdvisory.severity | wc -l )
-                  
+           
+          echo $count 
           echo ::set-output name=critical_alerts::$count 
       - name: Error Exit
         if: steps.alerts.outputs.critical_alerts > 0
