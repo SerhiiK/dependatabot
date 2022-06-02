@@ -8,42 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Check vulnerability
     steps:
-      - run: env
-      
       - name: Check Dependabot Alerts
-        id: alerts
-        run: |          
-         script='query {
-           repository( owner: \"OWNER\", name: \"REPO\" ) {
-             vulnerabilityAlerts(first: 10) {
-               nodes {
-                 securityAdvisory {
-                   severity
-                 }
-                 state
-               }
-             }    
-           }
-         }' 
-         
-         export REPO=$(echo $GITHUB_REPOSITORY | cut -f2 -d "/")
-         
-         script=$(echo $script | sed "s|OWNER|${GITHUB_REPOSITORY_OWNER}|g")
-         script=$(echo $script | sed "s|REPO|${REPO}|g")
-          
-         echo $script 
-         
-         count=$(curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
-                         -H 'Content-Type: application/json' \
-                         -X POST https://api.github.com/graphql \
-                         --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | \
-                         jq 'select((.securityAdvisory.severity == "CRITICAL") and .state == "OPEN" )' | \
-                         jq .securityAdvisory.severity | wc -l )
-           
-          echo $count 
-          echo ::set-output name=critical_alerts::$count
-          
-      - name: Pull alerts
         id: alerts-list
         if: steps.alerts.outputs.critical_alerts > 0
         run: |          
@@ -83,7 +48,7 @@ jobs:
           echo ::set-output name=alerts_list::$result
           
       - name: Comment PR
-        if: steps.alerts.outputs.critical_alerts > 0
+        if: steps.alerts.outputs.critical_alerts != ""
         uses: thollander/actions-comment-pull-request@v1
         with:
           message: |
@@ -92,5 +57,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
       
       - name: Error exit
-        if: steps.alerts.outputs.critical_alerts > 0
+        if: steps.alerts.outputs.critical_alerts != ""
         run: exit 1
