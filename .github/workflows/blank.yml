@@ -40,6 +40,8 @@ jobs:
                   --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability | \
                   jq 'select(.advisory.severity == "CRITICAL")' > result.json
           
+          result=$(cat result.json | jq .advisory.permalink -r)
+          
           echo $result
           
           echo "::set-output name=alerts_list::$result"
