@@ -43,9 +43,8 @@ jobs:
           echo $count 
           echo ::set-output name=critical_alerts::$count
           
-      - name: Error Exit
+      - name: Pull alerts
         if: steps.alerts.outputs.critical_alerts > 0
-        continue-on-error: true
         run: |          
           script='query {
             repository(owner: \"$OWNER\", name: \"REPOSITOR\") {
@@ -77,18 +76,19 @@ jobs:
                   -X POST https://api.github.com/graphql \
                   --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability | \
                   jq 'select(.advisory.severity == "CRITICAL")' > result.json
-        
-          echo ::set-output name=alerts_list::$(cat result.json | jq .advisory.permalink -r )
+            
+            cat result.json
+#           echo ::set-output name=alerts_list::$(cat result.json | jq .advisory.permalink -r )
           
-      - name: Comment PR
-        if: steps.alerts.outputs.critical_alerts > 0
-        uses: thollander/actions-comment-pull-request@v1
-        with:
-          message: |
-               This PR has secutiry alerts. Pls fix it before merge:
-               ${{ steps.alerts-list.outputs.alerts_list }}
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+#       - name: Comment PR
+#         if: steps.alerts.outputs.critical_alerts > 0
+#         uses: thollander/actions-comment-pull-request@v1
+#         with:
+#           message: |
+#                This PR has secutiry alerts. Pls fix it before merge:
+#                ${{ steps.alerts-list.outputs.alerts_list }}
+#           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
       
-      - name: Error exit
-        if: steps.alerts.outputs.critical_alerts > 0
-        run: exit 1
+#       - name: Error exit
+#         if: steps.alerts.outputs.critical_alerts > 0
+#         run: exit 1
