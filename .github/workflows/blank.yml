@@ -35,15 +35,12 @@ jobs:
           
          echo $script 
          
-         #count=$(
-          curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
+         count=$(curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
                          -H 'Content-Type: application/json' \
                          -X POST https://api.github.com/graphql \
-                         --data "{ \"query\": \"$script\"}" 
-                         
-                         #| jq .data.repository.vulnerabilityAlerts.nodes[] | \
-                         #jq 'select((.securityAdvisory.severity == "CRITICAL") and .state == "OPEN" )' | \
-                         #jq .securityAdvisory.severity | wc -l )
+                         --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | \
+                         jq 'select((.securityAdvisory.severity == "CRITICAL") and .state == "OPEN" )' | \
+                         jq .securityAdvisory.severity | wc -l )
                   
           echo ::set-output name=critical_alerts::$count 
       - name: Error Exit
