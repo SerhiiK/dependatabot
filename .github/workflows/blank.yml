@@ -49,7 +49,7 @@ jobs:
           echo ::set-output name=alerts_list::$result
           
       - name: Comment PR
-        if: steps.alerts.outputs.critical_alerts != ""
+        if: steps.alerts.outputs.critical_alerts != ''
         uses: thollander/actions-comment-pull-request@v1
         with:
           message: |
@@ -58,5 +58,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
       
       - name: Error exit
-        if: steps.alerts.outputs.critical_alerts != ""
+        if: steps.alerts.outputs.critical_alerts != ''
         run: exit 1
