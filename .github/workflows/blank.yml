@@ -1,9 +1,14 @@
-name: 🚀 Deploy to Prod
-on: workflow_dispatch
+name: 🚀 Check Vulnerability
+
+on:
+  workflow_call:
+  pull_request:
+  push:
+  
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    name: Deployment
+    name: Check vulnerability
     steps:
       - name: Check Dependabot Alerts
         id: alerts
@@ -12,9 +17,48 @@ jobs:
           github_personal_token: ${{ secrets.GH_PAT }}  
 
       - name: Error Exit
-        if: steps.alerts.outputs.total_alerts > 0
-        run: echo "::error ::Open Vulnerability Alerts Found" && exit 1
+        if: steps.alerts.outputs.critical_alerts > 0
+        continue-on-error: true
+        run: |
+          export OWNER=$(echo $GITHUB_REPOSITORY | cut -f1 -d "/")
+          export REPO=$(echo $GITHUB_REPOSITORY | cut -f2 -d "/")
+          
+          script='query {
+            repository(owner: \"OWNER\", name: \"REPO\") {
+              vulnerabilityAlerts(first: 10) {
+                nodes {
+                  securityVulnerability {
+                    package {
+                      name
+                    }
+                    advisory {
+                      severity
+                      permalink
+                    }  
+                  }
+                }
+              }    
+            }
+          }'
+          
+          script=$(echo $script | sed "s|OWNER|${OWNER}|g")
+          script=$(echo $script | sed "s|REPO|${REPO}|g")
+          
+          
+          curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
+                  -H 'Content-Type: application/json' \
+                  -X POST https://api.github.com/graphql \
+                  --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability | \
+                  jq 'select(.advisory.severity == "CRITICAL")' > result.json
+          
+        
+      - name: Comment PR
+        if: steps.alerts.outputs.critical_alerts > 0
+        uses: thollander/actions-comment-pull-request@v1
+        with:
+          message: echo $OWNER
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Deploy
         run: |
-          printf "No open vulnerabilities found. Running deployment now..."
+          printf "No open vulnerabilities found. Running deployment now..." 
