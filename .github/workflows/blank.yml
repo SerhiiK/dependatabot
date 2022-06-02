@@ -31,7 +31,7 @@ jobs:
           script=$(echo $script | sed "s|OWNER|${GITHUB_REPOSITORY_OWNER}|g")
           script=$(echo $script | sed "s|REPO|${REPO}|g")
           
-          script=$( curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
+          alerts=$( curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
                   -H 'Content-Type: application/json' \
                   -X POST https://api.github.com/graphql \
                   --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | \
@@ -39,8 +39,8 @@ jobs:
                    jq .securityVulnerability.advisory.permalink )
           
           
-          echo $script
-          echo "::set-output name=alerts_list::$result"
+          echo $alerts
+          echo "::set-output name=alerts_list::$alerts"
           
       - name: Comment PR
         #if: steps.alerts-list.outputs.alerts_list != ''
