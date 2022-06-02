@@ -1,5 +1,5 @@
 pytorch-lightning==1.6.3
 admesh==0.98.9
 Django==4.0.5
-thefuck==3.30
+thefuck==3.32
 apache-airflow==2.2.4
