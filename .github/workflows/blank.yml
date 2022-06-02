@@ -34,8 +34,6 @@ jobs:
           script=$(echo $script | sed "s|OWNER|${GITHUB_REPOSITORY_OWNER}|g")
           script=$(echo $script | sed "s|REPO|${REPO}|g")
           
-          echo $script
-          
           curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
                   -H 'Content-Type: application/json' \
                   -X POST https://api.github.com/graphql \
@@ -44,7 +42,8 @@ jobs:
           
           result=$(cat result.json | jq .advisory.permalink -r)
           echo $result
-          echo ::set-output name=alerts_list::$result
+          
+          echo "::set-output name=alerts_list::$result"
           
       - name: Comment PR
         if: steps.alerts.outputs.critical_alerts != ''
