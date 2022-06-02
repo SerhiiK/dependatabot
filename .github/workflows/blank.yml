@@ -1,7 +1,6 @@
 name: 🚀 Check Vulnerability
 
 on:
-  push:
   pull_request:
   
 jobs:
@@ -71,6 +70,8 @@ jobs:
           script=$(echo $script / sed "s/OWNER/${GITHUB_REPOSITORY_OWNER}/g")
           script=$(echo $script / sed "s/REPO/${GITHUB_REPOSITORY}/g")
           
+          echo $script
+          
           curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
                   -H 'Content-Type: application/json' \
                   -X POST https://api.github.com/graphql \
@@ -88,6 +89,6 @@ jobs:
                ${{ steps.alerts-list.outputs.alerts_list }}
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
       
-      - name: Check
+      - name: Error exit
         if: steps.alerts.outputs.critical_alerts > 0
         run: exit 1
