@@ -10,7 +10,6 @@ jobs:
     steps:
       - name: Check Dependabot Alerts
         id: alerts-list
-        if: steps.alerts.outputs.critical_alerts > 0
         run: |          
           script='query {
             repository(owner: \"OWNER\", name: \"REPO\") {
