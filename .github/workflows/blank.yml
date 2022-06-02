@@ -75,8 +75,9 @@ jobs:
                   -H 'Content-Type: application/json' \
                   -X POST https://api.github.com/graphql \
                   --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability | \
-                  jq 'select(.advisory.severity == "CRITICAL")'
-            
+                  jq 'select(.advisory.severity == "CRITICAL")' > result.json
+                  
+           echo  'cat result.json | jq .advisory.permalink -r'
 #          echo ::set-output name=alerts_list::$(cat result.json | jq .advisory.permalink -r )
           
 #       - name: Comment PR
