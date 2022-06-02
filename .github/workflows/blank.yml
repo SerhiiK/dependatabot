@@ -47,7 +47,7 @@ jobs:
         if: steps.alerts.outputs.critical_alerts > 0
         run: |          
           script='query {
-            repository(owner: \"$OWNER\", name: \"REPOSITOR\") {
+            repository(owner: \"$OWNER\", name: \"REPO\") {
               vulnerabilityAlerts(first: 10) {
                 nodes {
                   securityVulnerability {
