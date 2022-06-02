@@ -77,7 +77,7 @@ jobs:
                   --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability | \
                   jq 'select(.advisory.severity == "CRITICAL")' > result.json
           
-          cat result.json | jq .advisory.permalink -r
+          cat result.json | jq
           echo ::set-output name=alerts_list::$(cat result.json | jq .advisory.permalink -r )
           
       - name: Comment PR
