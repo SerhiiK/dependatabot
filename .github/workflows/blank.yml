@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     name: Check vulnerability
     steps:
+      - run: env
+      
       - name: Check Dependabot Alerts
         id: alerts
         run: |          
