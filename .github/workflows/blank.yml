@@ -31,14 +31,15 @@ jobs:
           script=$(echo $script | sed "s|OWNER|${GITHUB_REPOSITORY_OWNER}|g")
           script=$(echo $script | sed "s|REPO|${REPO}|g")
           
-          curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
+          script=$( curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
                   -H 'Content-Type: application/json' \
                   -X POST https://api.github.com/graphql \
                   --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | \
                    jq 'select(.securityVulnerability.advisory.severity == "CRITICAL")' | \
-                   jq .securityVulnerability.advisory.permalink
+                   jq .securityVulnerability.advisory.permalink )
           
           
+          echo $script
           echo "::set-output name=alerts_list::$result"
           
       - name: Comment PR
