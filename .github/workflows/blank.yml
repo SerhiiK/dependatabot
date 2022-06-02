@@ -13,12 +13,9 @@ jobs:
         run: |          
           script='query {
             repository(owner: \"OWNER\", name: \"REPO\") {
-              vulnerabilityAlerts(first: 10) {
+              vulnerabilityAlerts(first: 10, states: OPEN) {
                 nodes {
                   securityVulnerability {
-                    package {
-                      name
-                    }
                     advisory {
                       severity
                       permalink
@@ -37,12 +34,10 @@ jobs:
           curl -s -H "Authorization: bearer ${{ secrets.GH_PAT }}" \
                   -H 'Content-Type: application/json' \
                   -X POST https://api.github.com/graphql \
-                  --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability | \
-                  jq 'select(.advisory.severity == "CRITICAL")' > result.json
+                  --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | \
+                   jq 'select(.securityVulnerability.advisory.severity == "CRITICAL")' | \
+                   jq .securityVulnerability.advisory.permalink
           
-          result=$(cat result.json | jq .advisory.permalink -r)
-          
-          echo $result
           
           echo "::set-output name=alerts_list::$result"
           
