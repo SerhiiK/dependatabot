@@ -40,13 +40,12 @@ jobs:
                   --data "{ \"query\": \"$script\"}" | jq .data.repository.vulnerabilityAlerts.nodes[] | jq .securityVulnerability | \
                   jq 'select(.advisory.severity == "CRITICAL")' > result.json
           
-          result=$(cat result.json | jq .advisory.permalink -r)
           echo $result
           
           echo "::set-output name=alerts_list::$result"
           
       - name: Comment PR
-        if: steps.alerts.outputs.critical_alerts != ''
+        if: steps.alerts-list.outputs.alerts_list != ''
         uses: thollander/actions-comment-pull-request@v1
         with:
           message: |
@@ -55,5 +54,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
       
       - name: Error exit
-        if: steps.alerts.outputs.critical_alerts != ''
+        if: steps.alerts-list.outputs.alerts_list != ''
         run: exit 1
