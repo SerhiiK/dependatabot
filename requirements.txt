@@ -4,3 +4,4 @@ Django==4.0.5
 thefuck==3.30
 apache-airflow==2.2.4
 python-libnmap==0.7.1
+tensorflow==1.7.0
